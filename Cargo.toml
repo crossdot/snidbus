@@ -1,0 +1,7 @@
+[package]
+name = "snidbus"
+version = "0.1.0"
+authors = ["Pavlikov Vitaly <vpavlikov@marathonbet.ru>"]
+
+[dependencies]
+dbus = "0.6"
