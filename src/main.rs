@@ -1,8 +1,9 @@
 extern crate dbus;
 
 use std::sync::Arc;
+
 use dbus::{Connection, BusType, NameFlag};
-use dbus::tree::Factory;
+use dbus::tree::{Access, Factory};
 
 fn main() {
     // Let's start by starting up a connection to the session bus and register a name.
@@ -31,28 +32,26 @@ fn main() {
         f.interface("org.kde.StatusNotifierWatcher", ())
             .add_m(
                 // ...and a method inside the interface.
-                f.method("RegisterStatusNotifierItem", (), move |m| {
+                f   .method("RegisterStatusNotifierItem", (), move |m| {
 
                     // This is the callback that will be called when another peer on the bus calls our method.
                     // the callback receives "MethodInfo" struct and can return either an error, or a list of
                     // messages to send back.
 
                     let service: &str = m.msg.read1()?;
-                    let s = format!("Hello {}!", service);
-                    let mret = m.msg.method_return().append1(s);
+                    println!("Hello {}!", service);
 
                     // Two messages will be returned - one is the method return (and should always be there),
                     // and in our case we also have a signal we want to send at the same time.
-                    Ok(vec!(mret))
+                    Ok(vec![])
 
                 // Our method has one output argument and one input argument.
                 })
                 .inarg::<&str,_>("service")
-                .outarg::<&str,_>("reply")
             )
             .add_m(
                 // ...and a method inside the interface.
-                f.method("RegisterStatusNotifierHost", (), move |m| {
+                f   .method("RegisterStatusNotifierHost", (), move |m| {
 
                     // This is the callback that will be called when another peer on the bus calls our method.
                     // the callback receives "MethodInfo" struct and can return either an error, or a list of
@@ -60,6 +59,7 @@ fn main() {
 
                     let service: &str = m.msg.read1()?;
                     let s = format!("Hello {}!", service);
+                    println!("{}", s);
                     let mret = m.msg.method_return().append1(s);
 
                     let sig = signal_status_notifier_host_registered
@@ -76,13 +76,34 @@ fn main() {
                 .outarg::<&str,_>("reply")
             )
             .add_p(
-                f.property::<bool,_>("RegisteredStatusNotifierItems", ())
+                f   .property::<bool,_>("RegisteredStatusNotifierItems", ())
+                    .access(Access::ReadWrite)
+                    .on_get(|_i, _m| {
+                        Ok(())
+                    })
+                    .on_set(|_i, _m| {
+                        Ok(())
+                    })
             )
             .add_p(
-                f.property::<bool,_>("IsStatusNotifierHostRegistered", ())
+                f   .property::<bool,_>("IsStatusNotifierHostRegistered", ())
+                    .access(Access::ReadWrite)
+                    .on_get(|_i, _m| {
+                        Ok(())
+                    })
+                    .on_set(|_i, _m| {
+                        Ok(())
+                    })
             )
             .add_p(
-                f.property::<i32,_>("ProtocolVersion", ())
+                f   .property::<i32,_>("ProtocolVersion", ())
+                    .access(Access::ReadWrite)
+                    .on_get(|_i, _m| {
+                        Ok(())
+                    })
+                    .on_set(|_i, _m| {
+                        Ok(())
+                    })
             )
              // We also add the signal to the interface. This is mainly for introspection.
             .add_s(signal_status_notifier_item_registered2)
